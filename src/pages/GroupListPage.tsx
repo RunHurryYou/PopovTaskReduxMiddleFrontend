@@ -1,16 +1,30 @@
-import React, {memo} from 'react';
-import {CommonPageProps} from './types';
-import {Col, Row} from 'react-bootstrap';
-import {GroupContactsCard} from 'src/components/GroupContactsCard';
+import { useState } from 'react';
+import { Button, Col, Row } from 'react-bootstrap';
+import { GroupContactsCard } from 'src/components/GroupContactsCard';
+import { ModalAddGroup } from 'src/components/ModalAddGroup';
+import { useAppSelector } from 'src/store/hooks';
 
-export const GroupListPage = memo<CommonPageProps>(({contactsState, groupContactsState}) => {
+export const GroupListPage = () => {
+  const [showModal, setShowModal] = useState(false);
+  const groupContactsState = useAppSelector((state) => state.groupContacts);
   return (
-    <Row xxl={4}>
-      {groupContactsState[0].map((groupContacts) => (
-        <Col key={groupContacts.id}>
-          <GroupContactsCard groupContacts={groupContacts} withLink />
+    <>
+      <Row xxl={1}>
+        <Col className="mx-auto">
+          <Button onClick={() => setShowModal(true)}>Добавить</Button>
         </Col>
-      ))}
-    </Row>
+      </Row>
+      <Row xxl={4}>
+        {groupContactsState.ids.map((id) => (
+          <Col key={id}>
+            <GroupContactsCard groupContacts={groupContactsState.entities[id]} withLink />
+          </Col>
+        ))}
+      </Row>
+      <ModalAddGroup
+        show={showModal}
+        onHide={() => setShowModal(false)}
+      />
+    </>
   );
-});
+};
