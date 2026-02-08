@@ -1,52 +1,60 @@
-import React, {memo, useState} from 'react';
-import {CommonPageProps} from './types';
-import {Col, Row} from 'react-bootstrap';
-import {ContactCard} from 'src/components/ContactCard';
-import {FilterForm, FilterFormValues} from 'src/components/FilterForm';
-import {ContactDto} from 'src/types/dto/ContactDto';
+import { useEffect, useState } from 'react';
+import { Button, Col, Row } from 'react-bootstrap';
+import { ContactCard } from 'src/components/ContactCard';
+import { FilterForm, FilterFormValues } from 'src/components/FilterForm';
+import { ModalAddContact } from 'src/components/ModalAddContact';
+import { useAppSelector } from 'src/store/hooks';
+import { ContactDto } from 'src/types/dto/ContactDto';
 
+export const ContactListPage = () => {
+  const [showModal, setShowModal] = useState(false);
+  const contacts = useAppSelector((state) => state.contacts);
+  const groupContactsState = useAppSelector((state) => state.groupContacts);
+  const [findContacts, setFindContacts] = useState<ContactDto[]>(contacts.ids.map((id) => contacts.entities[id]));
 
-export const ContactListPage = memo<CommonPageProps>(({
-  contactsState, groupContactsState
-}) => {
-  const [contacts, setContacts] = useState<ContactDto[]>(contactsState[0])
+  useEffect(() => {
+    setFindContacts(contacts.ids.map((id) => contacts.entities[id]));
+  }, [contacts]);
+
   const onSubmit = (fv: Partial<FilterFormValues>) => {
-    let findContacts: ContactDto[] = contactsState[0];
+
+    let newContacts = contacts.ids.map((id) => contacts.entities[id]);
 
     if (fv.name) {
       const fvName = fv.name.toLowerCase();
-      findContacts = findContacts.filter(({name}) => (
-        name.toLowerCase().indexOf(fvName) > -1
-      ))
+      newContacts = newContacts.filter((contact) => contact.name.toLowerCase().includes(fvName));
     }
 
     if (fv.groupId) {
-      const groupContacts = groupContactsState[0].find(({id}) => id === fv.groupId);
-
-      if (groupContacts) {
-        findContacts = findContacts.filter(({id}) => (
-          groupContacts.contactIds.includes(id)
-        ))
-      }
+      const groupId = fv.groupId;
+      if(groupId !== "Open this select menu")
+        newContacts = newContacts.filter((contact) => groupContactsState.entities[groupId].contactIds.includes(contact.id));
     }
 
-    setContacts(findContacts)
+    setFindContacts(newContacts);
   }
 
   return (
-    <Row xxl={1}>
-      <Col className="mb-3">
-        <FilterForm groupContactsList={groupContactsState[0]} initialValues={{}} onSubmit={onSubmit} />
-      </Col>
-      <Col>
-        <Row xxl={4} className="g-4">
-          {contacts.map((contact) => (
-            <Col key={contact.id}>
-              <ContactCard contact={contact} withLink />
-            </Col>
-          ))}
-        </Row>
-      </Col>
-    </Row>
+    <>
+      <Row xxl={1}>
+        <Col className="mb-3">
+          <FilterForm initialValues={{}} onSubmit={onSubmit} />
+          <Button onClick={() => setShowModal(true)}>Добавить</Button>
+        </Col>
+        <Col>
+          <Row xxl={4} className="g-4">
+            {findContacts.map((elem) => (
+              <Col key={elem.id}>
+                <ContactCard contact={elem} withLink />
+              </Col>
+            ))}
+          </Row>
+        </Col>
+      </Row>
+      <ModalAddContact
+        show={showModal}
+        onHide={() => setShowModal(false)}
+      />
+    </>
   );
-})
+}

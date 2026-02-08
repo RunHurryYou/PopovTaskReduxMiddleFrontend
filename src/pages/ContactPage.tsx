@@ -1,21 +1,17 @@
-import React, {FC, useEffect, useState} from 'react';
-import {CommonPageProps} from './types';
 import {Col, Row} from 'react-bootstrap';
 import {useParams} from 'react-router-dom';
-import {ContactDto} from 'src/types/dto/ContactDto';
 import {ContactCard} from 'src/components/ContactCard';
 import {Empty} from 'src/components/Empty';
+import { useAppSelector } from 'src/store/hooks';
 
 
-export const ContactPage: FC<CommonPageProps> = ({
-  contactsState
-}) => {
+export const ContactPage = () => {
   const {contactId} = useParams<{ contactId: string }>();
-  const [contact, setContact] = useState<ContactDto>();
+  const contact = useAppSelector((state) => contactId ? state.contacts.entities[contactId]: undefined);
 
-  useEffect(() => {
-    setContact(() => contactsState[0].find(({id}) => id === contactId));
-  }, [contactId]);
+  if (!contactId || !contact) {
+    return <Empty />;
+  }
 
   return (
     <Row xxl={3}>

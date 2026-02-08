@@ -1,31 +1,18 @@
-import React, {memo, useEffect, useState} from 'react';
-import {CommonPageProps} from './types';
 import {Col, Row} from 'react-bootstrap';
 import {useParams} from 'react-router-dom';
-import {ContactDto} from 'src/types/dto/ContactDto';
-import {GroupContactsDto} from 'src/types/dto/GroupContactsDto';
 import {GroupContactsCard} from 'src/components/GroupContactsCard';
 import {Empty} from 'src/components/Empty';
 import {ContactCard} from 'src/components/ContactCard';
+import { useAppSelector } from 'src/store/hooks';
 
-export const GroupPage = memo<CommonPageProps>(({
-  contactsState,
-  groupContactsState
-}) => {
+export const GroupPage = () => {
   const {groupId} = useParams<{ groupId: string }>();
-  const [contacts, setContacts] = useState<ContactDto[]>([]);
-  const [groupContacts, setGroupContacts] = useState<GroupContactsDto>();
+  const contacts = useAppSelector((state) => state.contacts);
+  const groupContacts = useAppSelector((state) => groupId ? state.groupContacts.entities[groupId]: undefined);
 
-  useEffect(() => {
-    const findGroup = groupContactsState[0].find(({id}) => id === groupId);
-    setGroupContacts(findGroup);
-    setContacts(() => {
-      if (findGroup) {
-        return contactsState[0].filter(({id}) => findGroup.contactIds.includes(id))
-      }
-      return [];
-    });
-  }, [groupId]);
+  if (!groupId || !groupContacts) {
+    return <Empty />;
+  }
 
   return (
     <Row className="g-4">
@@ -40,9 +27,9 @@ export const GroupPage = memo<CommonPageProps>(({
           </Col>
           <Col>
             <Row xxl={4} className="g-4">
-              {contacts.map((contact) => (
-                <Col key={contact.id}>
-                  <ContactCard contact={contact} withLink />
+              {groupContacts.contactIds.map((id) => (
+                <Col key={id}>
+                  <ContactCard contact={contacts.entities[id]} withLink />
                 </Col>
               ))}
             </Row>
@@ -51,4 +38,4 @@ export const GroupPage = memo<CommonPageProps>(({
       ) : <Empty />}
     </Row>
   );
-});
+};
