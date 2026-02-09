@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { addGroupContactsActionCreator } from 'src/store/groupContacts/groupContactsActions';
-import { useAppDispatch, useAppSelector } from 'src/store/hooks';
+import { useGetContactsQuery } from 'src/store/contacts';
+import { useAddGroupContactMutation } from 'src/store/groupContacts';
 import { GroupContactsDto } from 'src/types/dto/GroupContactsDto';
 
 interface ModalAddGroupProps {
@@ -18,8 +18,8 @@ const initialFormData: GroupContactsDto = {
 }
 
 export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) => {
-  const contacts = useAppSelector((state) => state.contacts);
-  const dispatch = useAppDispatch();
+  const contacts = useGetContactsQuery().data || undefined;
+  const [addGroup] = useAddGroupContactMutation();
   const [formData, setFormData] = useState<GroupContactsDto>(initialFormData);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -40,7 +40,8 @@ export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) =>
 
   const handleSubmit = () => {
     console.log('Данные группы:', formData);
-    dispatch(addGroupContactsActionCreator(formData));
+    formData.id = crypto.randomUUID();
+    addGroup(formData);
     setFormData(initialFormData);
     onHide();
   };
@@ -98,9 +99,9 @@ export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) =>
               value={formData.contactIds}
               onChange={handleContactSelect}
             >
-              {contacts.ids.map(id => (
-                <option key={id} value={contacts.entities[id].id}>
-                  {contacts.entities[id].name} ({contacts.entities[id].phone})
+              {contacts && contacts.map(contact => (
+                <option key={contact.id} value={contact.id}>
+                  {contact.name} ({contact.phone})
                 </option>
               ))}
             </Form.Select>
@@ -118,7 +119,7 @@ export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) =>
                 {formData.contactIds.map(id => {
                   return (
                     <div key={id} className="badge bg-primary me-1 mb-1">
-                      {contacts.entities[id].name || 'Неизвестный контакт'}
+                      {contacts ? contacts.find(contact => contact.id === id)?.name : 'Неизвестный контакт'}
                     </div>
                   );
                 })}

@@ -1,23 +1,10 @@
-import {useEffect} from 'react';
 import './MainApp.scss';
 import {ThemeProvider} from 'react-bootstrap';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import {Layout} from 'src/components/Layout';
 import {ContactListPage, GroupPage, ContactPage, FavoritListPage, GroupListPage} from 'src/pages';
-import { useAppDispatch } from 'src/store/hooks';
-import { fetchContacts} from 'src/store/contacts/contactsActions';
-import { fetchGroupContacts } from 'src/store/groupContacts/groupContactsActions';
-import { fetchFavoriteContacts } from 'src/store/favContacts/favContactsActions';
 
 export const MainApp = () => {
-  const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(fetchContacts());
-    dispatch(fetchFavoriteContacts())
-    dispatch(fetchGroupContacts());
-  }, [dispatch])
-
   return (
     <ThemeProvider
       breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
