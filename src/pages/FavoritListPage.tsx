@@ -1,14 +1,15 @@
 import {Col, Row} from 'react-bootstrap';
 import {ContactCard} from 'src/components/ContactCard';
-import { useAppSelector } from 'src/store/hooks';
+import { useGetContactsQuery } from 'src/store/contacts';
 
 export const FavoritListPage = (() => {
-  const favContacts = useAppSelector((state) => state.favoriteContacts);
+  const contacts = useGetContactsQuery().data || undefined;
+  const favContacts = contacts ? contacts.filter((contact) => contact.favorite) : undefined;
   return (
     <Row xxl={4} className="g-4">
-      {favContacts.ids.map((id) => (
-        <Col key={id}>
-          <ContactCard contact={favContacts.entities[id]} withLink />
+      {favContacts && favContacts.map((contact) => (
+        <Col key={contact.id}>
+          <ContactCard contact={contact} withLink />
         </Col>
       ))}
     </Row>

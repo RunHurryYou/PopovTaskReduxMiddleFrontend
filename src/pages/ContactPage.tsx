@@ -2,12 +2,13 @@ import {Col, Row} from 'react-bootstrap';
 import {useParams} from 'react-router-dom';
 import {ContactCard} from 'src/components/ContactCard';
 import {Empty} from 'src/components/Empty';
-import { useAppSelector } from 'src/store/hooks';
+import { useGetContactsQuery } from 'src/store/contacts';
 
 
 export const ContactPage = () => {
   const {contactId} = useParams<{ contactId: string }>();
-  const contact = useAppSelector((state) => contactId ? state.contacts.entities[contactId]: undefined);
+  const contacts = useGetContactsQuery().data || undefined;
+  const contact = contacts?.find((contact) => contact.id === contactId);
 
   if (!contactId || !contact) {
     return <Empty />;

@@ -1,25 +1,24 @@
-import { applyMiddleware, combineReducers, createStore } from "redux";
-import {thunk} from "redux-thunk";
-import { contactsReducer } from "./contacts/contactsReducer";
-import { favoriteContactsReducer } from "./favContacts/favContactsReducers";
-import { groupContactsReducer } from "./groupContacts/groupContactsReducers";
-
-export interface RootState {
-    contacts: ReturnType<typeof contactsReducer>;
-    favoriteContacts: ReturnType<typeof favoriteContactsReducer>;
-    groupContacts: ReturnType<typeof groupContactsReducer>;
-}
+import { combineReducers } from "redux";
+import { configureStore } from "@reduxjs/toolkit";
+import { contactsMiddleware, contactsReducer, contactsReducerPath } from "./contacts";
+import { groupContactsMiddleware, groupContactsReducer, groupContactsReducerPath } from "./groupContacts";
 
 const rootReducer = combineReducers({
-    contacts: contactsReducer,
-    favoriteContacts: favoriteContactsReducer,
-    groupContacts: groupContactsReducer
+    [contactsReducerPath]: contactsReducer,
+    [groupContactsReducerPath]: groupContactsReducer
 });
 
-// @ts-ignore
-export const store = createStore(
-    rootReducer,
-    applyMiddleware(thunk)
+export const store = configureStore(
+    {
+        reducer: rootReducer,
+        middleware: (getDefaultMiddleware) => 
+            getDefaultMiddleware().concat(
+                [
+                    contactsMiddleware,
+                    groupContactsMiddleware
+                ]
+            )
+    }
 );
-//ts много жалуется если таким способом обьявлять rootState
-//export type RootState = ReturnType<typeof store.getState>;
+
+export type RootState = ReturnType<typeof store.getState>;

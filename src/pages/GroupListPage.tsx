@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
 import { GroupContactsCard } from 'src/components/GroupContactsCard';
 import { ModalAddGroup } from 'src/components/ModalAddGroup';
-import { useAppSelector } from 'src/store/hooks';
+import { useGetGroupContactsQuery } from 'src/store/groupContacts';
 
 export const GroupListPage = () => {
   const [showModal, setShowModal] = useState(false);
-  const groupContactsState = useAppSelector((state) => state.groupContacts);
+  const groupContacts = useGetGroupContactsQuery().data || [];
   return (
     <>
       <Row xxl={1}>
@@ -15,9 +15,9 @@ export const GroupListPage = () => {
         </Col>
       </Row>
       <Row xxl={4}>
-        {groupContactsState.ids.map((id) => (
-          <Col key={id}>
-            <GroupContactsCard groupContacts={groupContactsState.entities[id]} withLink />
+        {groupContacts.map((groupContact) => (
+          <Col key={groupContact.id}>
+            <GroupContactsCard groupContacts={groupContact} withLink />
           </Col>
         ))}
       </Row>

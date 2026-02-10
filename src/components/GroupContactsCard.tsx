@@ -1,8 +1,6 @@
-import {memo} from 'react';
 import {Badge, Card} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
-import { deleteGroupContactsActionCreator } from 'src/store/groupContacts/groupContactsActions';
-import { useAppDispatch } from 'src/store/hooks';
+import { useDeleteGroupContactMutation } from 'src/store/groupContacts';
 import {GroupContactsDto} from 'src/types/dto/GroupContactsDto';
 
 interface GroupContactsCardProps {
@@ -10,7 +8,7 @@ interface GroupContactsCardProps {
   withLink?: boolean
 }
 
-export const GroupContactsCard = memo<GroupContactsCardProps>(({
+export const GroupContactsCard = (({
     groupContacts: {
       id,
       name,
@@ -18,11 +16,10 @@ export const GroupContactsCard = memo<GroupContactsCardProps>(({
       photo,
       contactIds
     }, withLink
-  }) => {
-    const dispatch = useAppDispatch();
-
+  }: GroupContactsCardProps) => {
+    const [deleteGroup] = useDeleteGroupContactMutation();
     const handleDelete = () => {
-      dispatch(deleteGroupContactsActionCreator(id));
+      deleteGroup(id);
     }
     return (
       <Card key={id}>

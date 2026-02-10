@@ -1,49 +1,66 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
 import { ContactCard } from 'src/components/ContactCard';
 import { FilterForm, FilterFormValues } from 'src/components/FilterForm';
 import { ModalAddContact } from 'src/components/ModalAddContact';
-import { useAppSelector } from 'src/store/hooks';
-import { ContactDto } from 'src/types/dto/ContactDto';
+import { useGetContactsQuery } from 'src/store/contacts';
+import { useGetGroupContactsQuery } from 'src/store/groupContacts';
 
 export const ContactListPage = () => {
   const [showModal, setShowModal] = useState(false);
-  const contacts = useAppSelector((state) => state.contacts);
-  const groupContactsState = useAppSelector((state) => state.groupContacts);
-  const [findContacts, setFindContacts] = useState<ContactDto[]>(contacts.ids.map((id) => contacts.entities[id]));
+  const [filterValues, setFilterValues] = useState<Partial<FilterFormValues>>({});
+  
+  const getContacts = useGetContactsQuery();
+  const contacts = useMemo(() => getContacts.data || [], [getContacts.data]);
+  const groupContactsHook = useGetGroupContactsQuery();
+  const groupContacts = useMemo(() => groupContactsHook.data || [], [groupContactsHook.data]);
 
-  useEffect(() => {
-    setFindContacts(contacts.ids.map((id) => contacts.entities[id]));
-  }, [contacts]);
+  const filteredContacts = useMemo(() => {
+    if (!contacts || contacts.length === 0) return [];
+    
+    let result = [...contacts];
 
-  const onSubmit = (fv: Partial<FilterFormValues>) => {
-
-    let newContacts = contacts.ids.map((id) => contacts.entities[id]);
-
-    if (fv.name) {
-      const fvName = fv.name.toLowerCase();
-      newContacts = newContacts.filter((contact) => contact.name.toLowerCase().includes(fvName));
+    if (filterValues.name) {
+      const searchName = filterValues.name.toLowerCase();
+      result = result.filter((contact) => 
+        contact.name.toLowerCase().includes(searchName)
+      );
     }
 
-    if (fv.groupId) {
-      const groupId = fv.groupId;
-      if(groupId !== "Open this select menu")
-        newContacts = newContacts.filter((contact) => groupContactsState.entities[groupId].contactIds.includes(contact.id));
+    if (filterValues.groupId && filterValues.groupId !== "Open this select menu") {
+      const group = groupContacts.find(g => g.id === filterValues.groupId);
+      if (group) {
+        result = result.filter((contact) => 
+          group.contactIds.includes(contact.id)
+        );
+      }
     }
 
-    setFindContacts(newContacts);
-  }
+    return result;
+  }, [contacts, filterValues.groupId, filterValues.name, groupContacts]);
+
+  const handleSubmit = (fv: Partial<FilterFormValues>) => {
+    setFilterValues(fv);
+  };
+
+  const handleReset = () => {
+    setFilterValues({});
+  };
 
   return (
     <>
       <Row xxl={1}>
         <Col className="mb-3">
-          <FilterForm initialValues={{}} onSubmit={onSubmit} />
+          <FilterForm 
+            initialValues={{}} 
+            onSubmit={handleSubmit}
+            onReset={handleReset}
+          />
           <Button onClick={() => setShowModal(true)}>Добавить</Button>
         </Col>
         <Col>
           <Row xxl={4} className="g-4">
-            {findContacts.map((elem) => (
+            {filteredContacts.map((elem) => (
               <Col key={elem.id}>
                 <ContactCard contact={elem} withLink />
               </Col>

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { addContactActionCreator } from 'src/store/contacts/contactsActions';
-import { useAppDispatch } from 'src/store/hooks';
+import { useAddContactMutation } from 'src/store/contacts';
 import { ContactDto } from 'src/types/dto/ContactDto';
 
 interface ModalAddProps {
@@ -15,13 +14,13 @@ const initialFormData: ContactDto = {
   name: '',
   birthday: '',
   address: '',
-  photo: ''
+  photo: '',
+  favorite: false
 };
 
 export const ModalAddContact: React.FC<ModalAddProps> = ({ show, onHide }) => {
   const [formData, setFormData] = useState<ContactDto>(initialFormData);
-
-  const dispatch = useAppDispatch();
+  const [addContact] = useAddContactMutation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -32,7 +31,8 @@ export const ModalAddContact: React.FC<ModalAddProps> = ({ show, onHide }) => {
   };
 
   const handleSubmit = () => {
-    dispatch(addContactActionCreator(formData));
+    formData.id = crypto.randomUUID();
+    addContact(formData);
     setFormData(initialFormData);
     onHide();
   };

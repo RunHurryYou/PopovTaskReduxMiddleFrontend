@@ -2,14 +2,13 @@ import {memo} from 'react';
 import {ContactDto} from 'src/types/dto/ContactDto';
 import {Badge, Card, ListGroup} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from 'src/store/hooks';
-import { deleteContactFromGroupActionCreator } from 'src/store/groupContacts/groupContactsActions';
-import { deleteContactActionCreator } from 'src/store/contacts/contactsActions';
-import { deleteContactFromFavoriteActionCreator, switchFavoriteContactsActionCreator } from 'src/store/favContacts/favContactsActions';
+import { useDeleteContactMutation, useGetContactsQuery, useSwitchFavoriteContactMutation } from 'src/store/contacts';
+import { useDeleteContactFromGroupMutation } from 'src/store/groupContacts';
 
 interface ContactCardProps {
   contact: ContactDto,
-  withLink?: boolean
+  withLink?: boolean,
+  groupId?: string
 }
 
 export const ContactCard = memo<ContactCardProps>(({
@@ -20,15 +19,19 @@ export const ContactCard = memo<ContactCardProps>(({
       phone,
       birthday,
       address
-    }, withLink
+    }, 
+    withLink,
+    groupId
   }) => {
-    const dispatch = useAppDispatch();
-    const favContacts = useAppSelector((state)=> state.favoriteContacts);
+    const [deleteContact] = useDeleteContactMutation();
+    const [switchFavoriteContacts] = useSwitchFavoriteContactMutation();
+    const [deleteContactFromGroup] = useDeleteContactFromGroupMutation();
+    const contacts = useGetContactsQuery().data || undefined;
 
-    const handleDelete = () => {
-      dispatch(deleteContactFromGroupActionCreator(id));
-      dispatch(deleteContactActionCreator(id));
-      dispatch(deleteContactFromFavoriteActionCreator(id));
+    const handleDelete = async () => {
+      if(groupId)
+        await deleteContactFromGroup({id: id, groupId});
+      await deleteContact(id);
     }
     return (
       <Card key={id}>
@@ -40,12 +43,12 @@ export const ContactCard = memo<ContactCardProps>(({
           
           <div className="position-absolute top-0 end-0 m-2 d-flex gap-2">
             <Badge
-              onClick={() => dispatch(switchFavoriteContactsActionCreator({id, name, phone, birthday, address, photo}))} 
+              onClick={() => switchFavoriteContacts(id)} 
               pill 
               bg="transparent"
               className="fs-5 border-0 p-0"
               style={{ 
-                color: favContacts.ids.includes(id) ? 'red' : 'rgba(255, 255, 255, 0.8)',
+                color: contacts && contacts.find((contact) => contact.id === id && contact.favorite) ? 'red' : 'rgba(255, 255, 255, 0.8)',
                 textShadow: '0 2px 4px rgba(0,0,0,0.5)',
                 cursor: 'pointer',
                 width: '30px',
