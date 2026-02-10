@@ -1,19 +1,18 @@
+import { observer } from 'mobx-react-lite';
 import { useMemo, useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
 import { ContactCard } from 'src/components/ContactCard';
 import { FilterForm, FilterFormValues } from 'src/components/FilterForm';
 import { ModalAddContact } from 'src/components/ModalAddContact';
-import { useGetContactsQuery } from 'src/store/contacts';
-import { useGetGroupContactsQuery } from 'src/store/groupContacts';
+import { contactsStore } from 'src/store/contactsStore';
+import { groupContactsStore } from 'src/store/groupContactsStore';
 
-export const ContactListPage = () => {
+export const ContactListPage = observer(() => {
   const [showModal, setShowModal] = useState(false);
   const [filterValues, setFilterValues] = useState<Partial<FilterFormValues>>({});
   
-  const getContacts = useGetContactsQuery();
-  const contacts = useMemo(() => getContacts.data || [], [getContacts.data]);
-  const groupContactsHook = useGetGroupContactsQuery();
-  const groupContacts = useMemo(() => groupContactsHook.data || [], [groupContactsHook.data]);
+  const contacts = contactsStore.contacts
+  const groupContacts = groupContactsStore.groupContacts
 
   const filteredContacts = useMemo(() => {
     if (!contacts || contacts.length === 0) return [];
@@ -74,4 +73,4 @@ export const ContactListPage = () => {
       />
     </>
   );
-}
+});

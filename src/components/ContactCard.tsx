@@ -1,9 +1,8 @@
-import {memo} from 'react';
 import {ContactDto} from 'src/types/dto/ContactDto';
 import {Badge, Card, ListGroup} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
-import { useDeleteContactMutation, useGetContactsQuery, useSwitchFavoriteContactMutation } from 'src/store/contacts';
-import { useDeleteContactFromGroupMutation } from 'src/store/groupContacts';
+import { contactsStore } from 'src/store/contactsStore';
+import { observer } from 'mobx-react-lite';
 
 interface ContactCardProps {
   contact: ContactDto,
@@ -11,7 +10,7 @@ interface ContactCardProps {
   groupId?: string
 }
 
-export const ContactCard = memo<ContactCardProps>(({
+export const ContactCard = observer<ContactCardProps>(({
     contact: {
       photo,
       id,
@@ -23,15 +22,11 @@ export const ContactCard = memo<ContactCardProps>(({
     withLink,
     groupId
   }) => {
-    const [deleteContact] = useDeleteContactMutation();
-    const [switchFavoriteContacts] = useSwitchFavoriteContactMutation();
-    const [deleteContactFromGroup] = useDeleteContactFromGroupMutation();
-    const contacts = useGetContactsQuery().data || undefined;
+
+    const contacts = contactsStore.contacts;
 
     const handleDelete = async () => {
-      if(groupId)
-        await deleteContactFromGroup({id: id, groupId});
-      await deleteContact(id);
+      await contactsStore.delete(id);
     }
     return (
       <Card key={id}>
@@ -43,7 +38,7 @@ export const ContactCard = memo<ContactCardProps>(({
           
           <div className="position-absolute top-0 end-0 m-2 d-flex gap-2">
             <Badge
-              onClick={() => switchFavoriteContacts(id)} 
+              onClick={() => contactsStore.switchFavorite(id)} 
               pill 
               bg="transparent"
               className="fs-5 border-0 p-0"

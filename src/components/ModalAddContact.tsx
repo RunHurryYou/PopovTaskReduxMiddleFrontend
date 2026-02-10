@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { useAddContactMutation } from 'src/store/contacts';
+import { contactsStore } from 'src/store/contactsStore';
 import { ContactDto } from 'src/types/dto/ContactDto';
 
 interface ModalAddProps {
@@ -20,7 +20,6 @@ const initialFormData: ContactDto = {
 
 export const ModalAddContact: React.FC<ModalAddProps> = ({ show, onHide }) => {
   const [formData, setFormData] = useState<ContactDto>(initialFormData);
-  const [addContact] = useAddContactMutation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -32,7 +31,7 @@ export const ModalAddContact: React.FC<ModalAddProps> = ({ show, onHide }) => {
 
   const handleSubmit = () => {
     formData.id = crypto.randomUUID();
-    addContact(formData);
+    contactsStore.add(formData);
     setFormData(initialFormData);
     onHide();
   };

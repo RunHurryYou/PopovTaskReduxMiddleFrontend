@@ -1,7 +1,8 @@
+import { observer } from 'mobx-react-lite';
 import React, { useState } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { useGetContactsQuery } from 'src/store/contacts';
-import { useAddGroupContactMutation } from 'src/store/groupContacts';
+import { contactsStore } from 'src/store/contactsStore';
+import { groupContactsStore } from 'src/store/groupContactsStore';
 import { GroupContactsDto } from 'src/types/dto/GroupContactsDto';
 
 interface ModalAddGroupProps {
@@ -17,9 +18,8 @@ const initialFormData: GroupContactsDto = {
     contactIds: []
 }
 
-export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) => {
-  const contacts = useGetContactsQuery().data || undefined;
-  const [addGroup] = useAddGroupContactMutation();
+export const ModalAddGroup: React.FC<ModalAddGroupProps> = observer(({ show, onHide }) => {
+  const contacts = contactsStore.contacts;
   const [formData, setFormData] = useState<GroupContactsDto>(initialFormData);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -39,9 +39,8 @@ export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) =>
   };
 
   const handleSubmit = () => {
-    console.log('Данные группы:', formData);
     formData.id = crypto.randomUUID();
-    addGroup(formData);
+    groupContactsStore.add(formData);
     setFormData(initialFormData);
     onHide();
   };
@@ -138,4 +137,4 @@ export const ModalAddGroup: React.FC<ModalAddGroupProps> = ({ show, onHide }) =>
       </Modal.Footer>
     </Modal>
   );
-};
+});

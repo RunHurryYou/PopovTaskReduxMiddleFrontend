@@ -1,12 +1,13 @@
+import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
 import { Button, Col, Row } from 'react-bootstrap';
 import { GroupContactsCard } from 'src/components/GroupContactsCard';
 import { ModalAddGroup } from 'src/components/ModalAddGroup';
-import { useGetGroupContactsQuery } from 'src/store/groupContacts';
+import { groupContactsStore } from 'src/store/groupContactsStore';
 
-export const GroupListPage = () => {
+export const GroupListPage = observer(() => {
   const [showModal, setShowModal] = useState(false);
-  const groupContacts = useGetGroupContactsQuery().data || [];
+  const groupContacts = groupContactsStore.groupContacts;
   return (
     <>
       <Row xxl={1}>
@@ -17,7 +18,7 @@ export const GroupListPage = () => {
       <Row xxl={4}>
         {groupContacts.map((groupContact) => (
           <Col key={groupContact.id}>
-            <GroupContactsCard groupContacts={groupContact} withLink />
+            <GroupContactsCard id={groupContact.id} withLink />
           </Col>
         ))}
       </Row>
@@ -27,4 +28,4 @@ export const GroupListPage = () => {
       />
     </>
   );
-};
+});

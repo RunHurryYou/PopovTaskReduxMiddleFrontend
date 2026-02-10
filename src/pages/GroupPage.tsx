@@ -3,14 +3,15 @@ import {useParams} from 'react-router-dom';
 import {GroupContactsCard} from 'src/components/GroupContactsCard';
 import {Empty} from 'src/components/Empty';
 import {ContactCard} from 'src/components/ContactCard';
-import { useGetContactsQuery } from 'src/store/contacts';
-import { useGetGroupContactsQuery } from 'src/store/groupContacts';
+import { observer } from 'mobx-react-lite';
+import { groupContactsStore } from 'src/store/groupContactsStore';
+import { contactsStore } from 'src/store/contactsStore';
 
-export const GroupPage = () => {
+export const GroupPage = observer(() => {
   const {groupId} = useParams<{ groupId: string }>();
-  const groupContacts = useGetGroupContactsQuery().data || [];
+  const groupContacts = groupContactsStore.groupContacts;
   const groupContact = groupContacts.find((groupContact) => groupContact.id === groupId);
-  const contacts = useGetContactsQuery().data || undefined;
+  const contacts = contactsStore.contacts;
 
   if (!groupId || !groupContacts || !contacts || !groupContact) {
     return <Empty />;
@@ -25,7 +26,7 @@ export const GroupPage = () => {
           <Col xxl={12}>
             <Row xxl={3}>
               <Col className="mx-auto">
-                <GroupContactsCard groupContacts={groupContact} />
+                <GroupContactsCard id={groupId} />
               </Col>
             </Row>
           </Col>
@@ -42,4 +43,4 @@ export const GroupPage = () => {
       ) : <Empty />}
     </Row>
   );
-};
+});
