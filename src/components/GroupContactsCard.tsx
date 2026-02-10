@@ -1,25 +1,20 @@
+import { observer } from 'mobx-react-lite';
 import {Badge, Card} from 'react-bootstrap';
 import {Link} from 'react-router-dom';
-import { useDeleteGroupContactMutation } from 'src/store/groupContacts';
+import { groupContactsStore } from 'src/store/groupContactsStore';
 import {GroupContactsDto} from 'src/types/dto/GroupContactsDto';
 
 interface GroupContactsCardProps {
-  groupContacts: GroupContactsDto,
+  id: GroupContactsDto['id'],
   withLink?: boolean
 }
 
-export const GroupContactsCard = (({
-    groupContacts: {
-      id,
-      name,
-      description,
-      photo,
-      contactIds
-    }, withLink
+export const GroupContactsCard = observer (({
+    id, withLink
   }: GroupContactsCardProps) => {
-    const [deleteGroup] = useDeleteGroupContactMutation();
+    const {name, description, photo, contactIds} = groupContactsStore.groupContacts.find((groupContact) => groupContact.id === id) || { name: '', description: '', photo: '', contactIds: [] };
     const handleDelete = () => {
-      deleteGroup(id);
+      groupContactsStore.delete(id);
     }
     return (
       <Card key={id}>

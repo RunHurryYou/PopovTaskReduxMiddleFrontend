@@ -1,10 +1,18 @@
+import { useEffect } from 'react';
 import './MainApp.scss';
-import {ThemeProvider} from 'react-bootstrap';
-import {BrowserRouter, Route, Routes} from 'react-router-dom';
-import {Layout} from 'src/components/Layout';
-import {ContactListPage, GroupPage, ContactPage, FavoritListPage, GroupListPage} from 'src/pages';
+import { ThemeProvider } from 'react-bootstrap';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Layout } from 'src/components/Layout';
+import { ContactListPage, GroupPage, ContactPage, FavoritListPage, GroupListPage } from 'src/pages';
+import { contactsStore } from 'src/store/contactsStore';
+import { groupContactsStore } from 'src/store/groupContactsStore';
 
 export const MainApp = () => {
+  useEffect(() => {
+    contactsStore.get();
+    groupContactsStore.get();
+  },
+    [])
   return (
     <ThemeProvider
       breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
@@ -14,26 +22,26 @@ export const MainApp = () => {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={
-              <ContactListPage/>
+              <ContactListPage />
             } />
             <Route path="contact">
               <Route index element={
-                <ContactListPage/>
+                <ContactListPage />
               } />
               <Route path=":contactId" element={
-                <ContactPage/>
+                <ContactPage />
               } />
             </Route>
             <Route path="groups">
               <Route index element={
-                <GroupListPage/>
+                <GroupListPage />
               } />
               <Route path=":groupId" element={
-                <GroupPage/>
+                <GroupPage />
               } />
             </Route>
             <Route path="favorit" element={
-              <FavoritListPage/>
+              <FavoritListPage />
             } />
           </Route>
         </Routes>

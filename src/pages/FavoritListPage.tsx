@@ -1,9 +1,10 @@
+import { observer } from 'mobx-react-lite';
 import {Col, Row} from 'react-bootstrap';
 import {ContactCard} from 'src/components/ContactCard';
-import { useGetContactsQuery } from 'src/store/contacts';
+import { contactsStore } from 'src/store/contactsStore';
 
-export const FavoritListPage = (() => {
-  const contacts = useGetContactsQuery().data || undefined;
+export const FavoritListPage = observer(() => {
+  const contacts = contactsStore.contacts;
   const favContacts = contacts ? contacts.filter((contact) => contact.favorite) : undefined;
   return (
     <Row xxl={4} className="g-4">
